@@ -39,6 +39,7 @@ For the old style svn structure, with entries files in the root and all subfolde
 
 - Python 2.7
 - requests
+- concurrent.futures (only if using the --threads option)
 
 ## Usage
 **TODO: The tool is still under development, so these instructions will change.**
@@ -46,9 +47,9 @@ For the old style svn structure, with entries files in the root and all subfolde
     python __init__.py [url]
 
 **Options**
--v, --verbose: Debug logging
+-v, --verbose: Debug logging.
 --git-download-pack: Attempt to download pack files, will only work if .git/objects/info/packs exists.
-
+--threads=x: Number of threads to use for downloading files.
 
 ## TODO
 
