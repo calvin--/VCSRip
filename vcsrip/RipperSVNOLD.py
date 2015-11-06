@@ -5,6 +5,7 @@ class RipperSVNOLD(object):
         self.vulnerability = vulnerability
         self.host = vulnerability['host']
         self.session = HTTP()
+        self.output_folder = "output/{}/".format(self.host.host)
 
     def parse_entries(self, entries_file=None, directory=""):
         if not entries_file:
@@ -24,7 +25,7 @@ class RipperSVNOLD(object):
             if(entries[x] == "file"):
                 self.download_file(
                     self.host.replace(path=directory + ".svn/text-base/" + entries[x-1] + ".svn-base"),
-                    "output/" + directory + "/" + entries[x-1]
+                    self.output_folder + directory + "/" + entries[x-1]
                 )
 
     def download_file(self, url, dest):

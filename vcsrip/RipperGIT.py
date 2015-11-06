@@ -3,17 +3,19 @@ import zlib
 import logging
 from http import HTTP
 from IndexParser import parse_index
+import concurrent.futures
 
 class RipperGIT(object):
 
     META_FILES = ['HEAD', 'FETCH_HEAD', 'COMMIT_EDITMSG', 'ORIG_HEAD', 'config', 'packed-refs', 'objects/info/packs']
 
-    def __init__(self, vulnerability):
+    def __init__(self, vulnerability, threads=0):
         self.vulnerability = vulnerability
         self.host = vulnerability['host']
         self.session = HTTP()
         self.output_folder = "output/{}/".format(self.host.host)
         self.output_git = self.output_folder + ".git/"
+        self.threads = threads
 
     def get_meta_files(self):
         for meta_file in self.META_FILES:
@@ -29,14 +31,23 @@ class RipperGIT(object):
         logging.debug("Writing index")
 
     def get_objects(self):
-        for file in self.index_files:
-            path = ".git/objects/" + file['sha1'][0:2] + "/" + file['sha1'][2:]
-            url = self.vulnerability['host'].replace(path = path)
+        objects = []
 
-            if self.session.get_file(url, self.output_folder + path):
-                logging.debug("Fetched {}".format(url))
-            else:
-                logging.debug("Failed {}".format(url))
+        for file in self.index_files:
+            git_file_path = ".git/objects/" + file['sha1'][0:2] + "/" + file['sha1'][2:]
+            path =  self.output_folder + git_file_path
+            url = self.vulnerability['host'].replace(path = git_file_path)
+
+            objects.append((url, path))
+
+        if self.threads:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=self.threads) as executor:
+                for object in objects:
+                    executor.submit(self.session.get_file, object[0], object[1])
+        else:
+            for object in objects:
+                self.session.get_file(object[0], object[1])
+
 
     def get_pack_files(self):
         if os.path.exists(self.output_git + "objects/info/packs"):

@@ -4,17 +4,19 @@ import os
 import concurrent.futures
 
 class RipperSVN(object):
-    def __init__(self, vulnerability):
+    def __init__(self, vulnerability, threads=0):
         self.vulnerability = vulnerability
         self.host = vulnerability['host']
         self.session = HTTP()
-        self.output_dir = "output/" + self.host.host + "/"
+        self.output_folder = "output/{}/".format(self.host.host)
+        self.threads = threads
+
 
     def parse_wc(self):
-        self.session.get_file("", self.output_dir + "wc.db", with_data=self.vulnerability['data'])
+        self.session.get_file("", self.output_folder + "wc.db", with_data=self.vulnerability['data'])
         print "Wrote wc.db to disk"
 
-        conn = sqlite3.connect(self.output_dir + 'wc.db')
+        conn = sqlite3.connect(self.output_folder + 'wc.db')
         c = conn.cursor()
         files = []
 
@@ -24,13 +26,16 @@ class RipperSVN(object):
                 url = self.host.replace(path=path)
                 filename = row[0]
 
-                if not os.path.exists(self.output_dir + filename):
-                    files.append((url, self.output_dir + filename))
+                if not os.path.exists(self.output_folder + filename):
+                    files.append((url, self.output_folder + filename))
 
             except:
                 pass
 
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
-            for file in files:
-                executor.submit(self.session.get_file, file[0], file[1])
+        if self.threads:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=self.threads) as executor:
+                for file in files:
+                    executor.submit(self.session.get_file, file[0], file[1])
+        else:
+            self.session.get_file(file[0], file[1])

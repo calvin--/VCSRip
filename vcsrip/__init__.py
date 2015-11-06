@@ -14,6 +14,8 @@ if __name__ == "__main__":
                          action="store_true")
     parser.add_argument("--git-download-pack", help="attempt to download git pack files",
                          action="store_true")
+    parser.add_argument("--threads", help="number of threads for concurrent download. Requires concurrent.futures",
+                        type=int, default=0)
 
     args = parser.parse_args()
 
@@ -25,10 +27,20 @@ if __name__ == "__main__":
     scanner = Scanner(args.url)
     vulnerability = scanner.scan_host()
 
+    if args.threads:
+        try:
+            import concurrent.futures
+            threads = args.threads
+        except ImportError:
+            threads = 0
+            logging.warning("--threads requires the concurrent.futures library")
+    else:
+        threads = 0
+
     if vulnerability:
         if vulnerability['type'] == 'git':
             logging.info("Attempting to download public git repository.")
-            git = RipperGIT(vulnerability)
+            git = RipperGIT(vulnerability, threads)
 
             logging.info("Downloading git meta files.")
             git.get_meta_files()
@@ -46,7 +58,7 @@ if __name__ == "__main__":
             logging.info("Done.")
 
         elif vulnerability['type'] == 'svn':
-            svn = RipperSVN(vulnerability)
+            svn = RipperSVN(vulnerability, threads)
             svn.parse_wc()
 
         elif vulnerability['type'] == 'svn_old':
