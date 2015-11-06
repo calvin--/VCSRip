@@ -7,6 +7,13 @@ logging.getLogger("requests").setLevel(logging.WARNING)
 packages.urllib3.disable_warnings()
 
 class HTTP(Session):
+    def __init__(self, *args, **kwargs):
+        super(HTTP, self).__init__(*args, **kwargs)
+
+        #TODO: Allow for custom user-agent
+        self.headers['User-Agent'] = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 " \
+                                             "(KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.36"
+
 
     def get_file(self, url, dest, with_data = None):
         if not os.path.exists(os.path.dirname(dest)):

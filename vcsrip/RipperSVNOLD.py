@@ -5,7 +5,6 @@ class RipperSVNOLD(object):
         self.vulnerability = vulnerability
         self.host = vulnerability['host']
         self.session = HTTP()
-        self.session.headers['User-Agent'] = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.36"
 
     def parse_entries(self, entries_file=None, directory=""):
         if not entries_file:
