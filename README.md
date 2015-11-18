@@ -47,6 +47,7 @@ For the old style svn structure, with entries files in the root and all subfolde
     python __init__.py [url]
 
 **Options**
+
 -v, --verbose: Debug logging.
 
 --git-download-pack: Attempt to download pack files, will only work if .git/objects/info/packs exists.
