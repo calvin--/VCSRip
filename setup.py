@@ -8,7 +8,6 @@ setup(name='vcsrip',
       description='VCSRip',
       url='https://github.com/calvin--/VCSRip',
       author='Simon Toft',
-      author_email='simon@toft.io',
       license='MIT',
       packages=['dvcsrip'],
       zip_safe=False)
